@@ -588,7 +588,7 @@ type ListTradesOpts struct {
 
 /*
 ListTrades Retrieve market trades
-You can use &#x60;from&#x60; and &#x60;to&#x60; to query by time range, or use &#x60;last_id&#x60; by scrolling page. The default behavior is by time range, The query range is the last 30 days.  Scrolling query using &#x60;last_id&#x60; is not recommended any more. If &#x60;last_id&#x60; is specified, time range query parameters will be ignored.
+支持指定 &#x60;from&#x60; 和 &#x60;to&#x60; 按时间范围查询或基于 &#x60;last_id&#x60; 的翻页查询。默认按时间范围查询,查询范围为最近30天。  基于 &#x60;last_id&#x60; 翻页的查询方式不再推荐继续使用。如果指定 &#x60;last_id&#x60; ，时间范围查询参数会被忽略。  使用 limit&amp;page分页功能检索数据时最大分页数量为100,000条，即 (limit * page - 1) &lt;&#x3D; 100000。
   - @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
   - @param currencyPair Currency pair
   - @param optional nil or *ListTradesOpts - Optional Parameters:
@@ -1115,7 +1115,7 @@ type ListSpotAccountBookOpts struct {
 
 /*
 ListSpotAccountBook Query account book
-Record time range cannot exceed 30 days
+记录查询时间范围不允许超过 30 天。  使用 limit&amp;page分页功能检索数据时最大分页数量为100,000条，即 (limit * page - 1) &lt;&#x3D; 100000。
   - @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
   - @param optional nil or *ListSpotAccountBookOpts - Optional Parameters:
   - @param "Currency" (optional.String) -  Retrieve data of the specified currency
@@ -2349,7 +2349,7 @@ type ListMyTradesOpts struct {
 
 /*
 ListMyTrades List personal trading history
-Spot,portfolio and margin trades are queried by default. If cross margin trades are needed, &#x60;account&#x60; must be set to &#x60;cross_margin&#x60;  You can also set &#x60;from&#x60; and(or) &#x60;to&#x60; to query by time range. If you don&#39;t specify &#x60;from&#x60; and/or &#x60;to&#x60; parameters, only the last 7 days of data will be retured. The range of &#x60;from&#x60; and &#x60;to&#x60; is not alloed to exceed 30 days.  Time range parameters are handled as order finish time.
+Spot,portfolio and margin trades are queried by default. If cross margin trades are needed, &#x60;account&#x60; must be set to &#x60;cross_margin&#x60;  You can also set &#x60;from&#x60; and(or) &#x60;to&#x60; to query by time range. If you don&#39;t specify &#x60;from&#x60; and/or &#x60;to&#x60; parameters, only the last 7 days of data will be retured. The range of &#x60;from&#x60; and &#x60;to&#x60; is not alloed to exceed 30 days.  Time range parameters are handled as order finish time. When using the limit&amp;page paging function to retrieve data, the maximum number of pages is 100,000, that is, (limit * page - 1) &lt;&#x3D; 100000.
   - @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
   - @param optional nil or *ListMyTradesOpts - Optional Parameters:
   - @param "CurrencyPair" (optional.String) -  Retrieve results with specified currency pair
@@ -2698,6 +2698,119 @@ func (a *SpotApiService) AmendBatchOrders(ctx context.Context, batchAmendItem []
 	}
 	// body params
 	localVarPostBody = &batchAmendItem
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if ctx.Value(ContextGateAPIV4) == nil {
+		// for compatibility, set configuration key and secret to context if ContextGateAPIV4 value is not present
+		ctx = context.WithValue(ctx, ContextGateAPIV4, GateAPIV4{
+			Key:    a.client.cfg.Key,
+			Secret: a.client.cfg.Secret,
+		})
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status + ", " + string(localVarBody),
+		}
+		var gateErr GateAPIError
+		if e := a.client.decode(&gateErr, localVarBody, localVarHTTPResponse.Header.Get("Content-Type")); e == nil && gateErr.Label != "" {
+			gateErr.APIError = newErr
+			return localVarReturnValue, localVarHTTPResponse, gateErr
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+// GetSpotInsuranceHistoryOpts Optional parameters for the method 'GetSpotInsuranceHistory'
+type GetSpotInsuranceHistoryOpts struct {
+	Page  optional.Int32
+	Limit optional.Int32
+}
+
+/*
+GetSpotInsuranceHistory Query spot insurance fund historical data
+  - @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param business Leverage business, margin - position by position; unified - unified account
+  - @param currency Currency
+  - @param from Start timestamp, seconds
+  - @param to End timestamp, in seconds
+  - @param optional nil or *GetSpotInsuranceHistoryOpts - Optional Parameters:
+  - @param "Page" (optional.Int32) -  Page number
+  - @param "Limit" (optional.Int32) -  The maximum number of items returned in the list, the default value is 30
+
+@return []SpotInsuranceHistory
+*/
+func (a *SpotApiService) GetSpotInsuranceHistory(ctx context.Context, business string, currency string, from int64, to int64, localVarOptionals *GetSpotInsuranceHistoryOpts) ([]SpotInsuranceHistory, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+		localVarReturnValue  []SpotInsuranceHistory
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/spot/insurance_history"
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	localVarQueryParams.Add("business", parameterToString(business, ""))
+	localVarQueryParams.Add("currency", parameterToString(currency, ""))
+	if localVarOptionals != nil && localVarOptionals.Page.IsSet() {
+		localVarQueryParams.Add("page", parameterToString(localVarOptionals.Page.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.Limit.IsSet() {
+		localVarQueryParams.Add("limit", parameterToString(localVarOptionals.Limit.Value(), ""))
+	}
+	localVarQueryParams.Add("from", parameterToString(from, ""))
+	localVarQueryParams.Add("to", parameterToString(to, ""))
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
 	if ctx == nil {
 		ctx = context.Background()
 	}

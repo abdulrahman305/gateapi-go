@@ -2371,7 +2371,7 @@ type ListCrossMarginAccountBookOpts struct {
 
 /*
 ListCrossMarginAccountBook Retrieve cross margin account change history
-Record time range cannot exceed 30 days
+记录查询时间范围不允许超过 30 天。  使用 limit&amp;page分页功能检索数据时最大分页数量为100,000条，即 (limit * page - 1) &lt;&#x3D; 100000。
   - @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
   - @param optional nil or *ListCrossMarginAccountBookOpts - Optional Parameters:
   - @param "Currency" (optional.String) -  Filter by currency

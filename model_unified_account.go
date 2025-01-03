@@ -14,34 +14,34 @@ type UnifiedAccount struct {
 	UserId int64 `json:"user_id,omitempty"`
 	// Time of the most recent refresh
 	RefreshTime int64 `json:"refresh_time,omitempty"`
-	// Whether account is locked
+	// Whether the account is locked, valid in cross-currency margin/combined margin mode, false in other modes such as single-currency margin mode
 	Locked   bool                      `json:"locked,omitempty"`
 	Balances map[string]UnifiedBalance `json:"balances,omitempty"`
 	// Total account assets converted to USD, i.e. the sum of `(available + freeze) * price`  in all currencies (deprecated, to be deprecated, replaced by unified_account_total)
 	Total string `json:"total,omitempty"`
-	// The total borrowed amount in USD, calculated as the sum of the product of `borrowed * price` for all currencies (excluding points cards).
+	// The total borrowed amount of the account converted into USD, i.e. the sum of `borrowed * price` of all currencies (excluding Point Cards). It is valid in cross-currency margin/combined margin mode, and is 0 in other modes such as single-currency margin mode.
 	Borrowed string `json:"borrowed,omitempty"`
-	// Total initial margin
+	// Total initial margin, valid in cross-currency margin/combined margin mode, 0 in other modes such as single-currency margin mode
 	TotalInitialMargin string `json:"total_initial_margin,omitempty"`
-	// Total margin balance
+	// Total margin balance, valid in cross-currency margin/combined margin mode, 0 in other modes such as single-currency margin mode
 	TotalMarginBalance string `json:"total_margin_balance,omitempty"`
-	// Total maintenance margin
+	// Total maintenance margin is valid in cross-currency margin/combined margin mode, and is 0 in other modes such as single-currency margin mode
 	TotalMaintenanceMargin string `json:"total_maintenance_margin,omitempty"`
-	// Total initial margin rate
+	// Total initial margin rate, valid in cross-currency margin/combined margin mode, 0 in other modes such as single-currency margin mode
 	TotalInitialMarginRate string `json:"total_initial_margin_rate,omitempty"`
-	// Total maintenance margin rate
+	// Total maintenance margin rate, valid in cross-currency margin/combined margin mode, 0 in other modes such as single-currency margin mode
 	TotalMaintenanceMarginRate string `json:"total_maintenance_margin_rate,omitempty"`
-	// Total available margin
+	// Available margin amount, valid in cross-currency margin/combined margin mode, 0 in other modes such as single-currency margin mode
 	TotalAvailableMargin string `json:"total_available_margin,omitempty"`
-	// Total amount of the portfolio margin account
+	// Unify the total account assets, valid in single currency margin/cross-currency margin/combined margin mode
 	UnifiedAccountTotal string `json:"unified_account_total,omitempty"`
-	// Total liabilities of the portfolio margin account
+	// Unify the total loan of the account, valid in the cross-currency margin/combined margin mode, and 0 in other modes such as single-currency margin mode
 	UnifiedAccountTotalLiab string `json:"unified_account_total_liab,omitempty"`
-	// Total equity of the portfolio margin account
+	// Unify the total account equity, valid in single currency margin/cross-currency margin/combined margin mode
 	UnifiedAccountTotalEquity string `json:"unified_account_total_equity,omitempty"`
-	// Leverage
+	// Actual leverage, valid in cross-currency margin/combined margin mode
 	Leverage string `json:"leverage,omitempty"`
-	// Total order loss, in USDT
+	// Total pending order loss, in USDT, valid in cross-currency margin/combined margin mode, 0 in other modes such as single-currency margin mode
 	SpotOrderLoss string `json:"spot_order_loss,omitempty"`
 	// Spot hedging status, true - enabled, false - not enabled.
 	SpotHedge bool `json:"spot_hedge,omitempty"`

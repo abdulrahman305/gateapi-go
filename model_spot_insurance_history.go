@@ -9,8 +9,11 @@
 
 package gateapi
 
-type UnifiedModeSet struct {
-	// Unified account mode:  - `classic`: Classic account mode - `multi_currency`: Multi-currency margin mode - `portfolio`: Portfolio margin mode - `single_currency`: Single Currency Margin Model
-	Mode     string          `json:"mode"`
-	Settings UnifiedSettings `json:"settings,omitempty"`
+type SpotInsuranceHistory struct {
+	// Currency
+	Currency string `json:"currency,omitempty"`
+	// 余额
+	Balance string `json:"balance,omitempty"`
+	// Creation time, timestamp, milliseconds
+	Time int64 `json:"time,omitempty"`
 }

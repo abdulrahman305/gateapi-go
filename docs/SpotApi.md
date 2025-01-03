@@ -30,6 +30,7 @@ Method | HTTP request | Description
 [**GetSystemTime**](SpotApi.md#GetSystemTime) | **Get** /spot/time | Get server current time
 [**CountdownCancelAllSpot**](SpotApi.md#CountdownCancelAllSpot) | **Post** /spot/countdown_cancel_all | Countdown cancel orders
 [**AmendBatchOrders**](SpotApi.md#AmendBatchOrders) | **Post** /spot/amend_batch_orders | Batch modification of orders
+[**GetSpotInsuranceHistory**](SpotApi.md#GetSpotInsuranceHistory) | **Get** /spot/insurance_history | Query spot insurance fund historical data
 [**ListSpotPriceTriggeredOrders**](SpotApi.md#ListSpotPriceTriggeredOrders) | **Get** /spot/price_orders | Retrieve running auto order list
 [**CreateSpotPriceTriggeredOrder**](SpotApi.md#CreateSpotPriceTriggeredOrder) | **Post** /spot/price_orders | Create a price-triggered order
 [**CancelSpotPriceTriggeredOrderList**](SpotApi.md#CancelSpotPriceTriggeredOrderList) | **Delete** /spot/price_orders | Cancel all open orders
@@ -436,7 +437,7 @@ No authorization required
 
 Retrieve market trades
 
-You can use `from` and `to` to query by time range, or use `last_id` by scrolling page. The default behavior is by time range, The query range is the last 30 days.  Scrolling query using `last_id` is not recommended any more. If `last_id` is specified, time range query parameters will be ignored.
+支持指定 `from` 和 `to` 按时间范围查询或基于 `last_id` 的翻页查询。默认按时间范围查询,查询范围为最近30天。  基于 `last_id` 翻页的查询方式不再推荐继续使用。如果指定 `last_id` ，时间范围查询参数会被忽略。  使用 limit&page分页功能检索数据时最大分页数量为100,000条，即 (limit * page - 1) <= 100000。
 
 ### Required Parameters
 
@@ -815,7 +816,7 @@ func main() {
 
 Query account book
 
-Record time range cannot exceed 30 days
+记录查询时间范围不允许超过 30 天。  使用 limit&page分页功能检索数据时最大分页数量为100,000条，即 (limit * page - 1) <= 100000。
 
 ### Required Parameters
 
@@ -1708,7 +1709,7 @@ func main() {
 
 List personal trading history
 
-Spot,portfolio and margin trades are queried by default. If cross margin trades are needed, `account` must be set to `cross_margin`  You can also set `from` and(or) `to` to query by time range. If you don't specify `from` and/or `to` parameters, only the last 7 days of data will be retured. The range of `from` and `to` is not alloed to exceed 30 days.  Time range parameters are handled as order finish time.
+Spot,portfolio and margin trades are queried by default. If cross margin trades are needed, `account` must be set to `cross_margin`  You can also set `from` and(or) `to` to query by time range. If you don't specify `from` and/or `to` parameters, only the last 7 days of data will be retured. The range of `from` and `to` is not alloed to exceed 30 days.  Time range parameters are handled as order finish time. When using the limit&page paging function to retrieve data, the maximum number of pages is 100,000, that is, (limit * page - 1) <= 100000.
 
 ### Required Parameters
 
@@ -1989,6 +1990,91 @@ func main() {
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+## GetSpotInsuranceHistory
+
+> []SpotInsuranceHistory GetSpotInsuranceHistory(ctx, business, currency, from, to, optional)
+
+Query spot insurance fund historical data
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**business** | **string**| Leverage business, margin - position by position; unified - unified account | 
+**currency** | **string**| Currency | 
+**from** | **int64**| Start timestamp, seconds | 
+**to** | **int64**| End timestamp, in seconds | 
+**optional** | **GetSpotInsuranceHistoryOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a GetSpotInsuranceHistoryOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**page** | **optional.Int32**| Page number | [default to 1]
+**limit** | **optional.Int32**| The maximum number of items returned in the list, the default value is 30 | [default to 30]
+
+### Example
+
+```golang
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/gateio/gateapi-go/v6"
+)
+
+func main() {
+    client := gateapi.NewAPIClient(gateapi.NewConfiguration())
+    // uncomment the next line if your are testing against testnet
+    // client.ChangeBasePath("https://fx-api-testnet.gateio.ws/api/v4")
+    ctx := context.WithValue(context.Background(),
+                             gateapi.ContextGateAPIV4,
+                             gateapi.GateAPIV4{
+                                 Key:    "YOUR_API_KEY",
+                                 Secret: "YOUR_API_SECRET",
+                             }
+                            )
+    business := "margin" // string - Leverage business, margin - position by position; unified - unified account
+    currency := "BTC" // string - Currency
+    from := 1547706332 // int64 - Start timestamp, seconds
+    to := 1547706332 // int64 - End timestamp, in seconds
+    
+    result, _, err := client.SpotApi.GetSpotInsuranceHistory(ctx, business, currency, from, to, nil)
+    if err != nil {
+        if e, ok := err.(gateapi.GateAPIError); ok {
+            fmt.Printf("gate api error: %s\n", e.Error())
+        } else {
+            fmt.Printf("generic error: %s\n", err.Error())
+        }
+    } else {
+        fmt.Println(result)
+    }
+}
+```
+
+
+### Return type
+
+[**[]SpotInsuranceHistory**](SpotInsuranceHistory.md)
+
+### Authorization
+
+[apiv4](../README.md#apiv4)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)

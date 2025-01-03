@@ -10,12 +10,12 @@
 package gateapi
 
 type UnifiedSettings struct {
-	// USDT contract switch. If not transmitted, the current switch value is used. If not transmitted for the first time, the default value is off.
+	// USDT contract switch. In cross-currency margin mode, it can only be turned on and not off
 	UsdtFutures bool `json:"usdt_futures,omitempty"`
-	// Spot hedging switch. If not transmitted, the current switch value is used. If not transmitted for the first time, the default value is off.
+	// 现货对冲开关。
 	SpotHedge bool `json:"spot_hedge,omitempty"`
 	// When the mode is set to combined margin mode, will funds be used as margin
 	UseFunding bool `json:"use_funding,omitempty"`
-	// Option switch. If not transmitted, the current switch value is used. If not transmitted for the first time, the default value is off.
+	// Option switch. In cross-currency margin mode, it can only be turned on and not off
 	Options bool `json:"options,omitempty"`
 }
